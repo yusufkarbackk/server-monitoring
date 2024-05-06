@@ -27,15 +27,19 @@ router.get('/get-data', function (req, res) {
 router.post('/post-data', async (req, res) => {
 
   try {
-    const { suhu, kelembaban } = req.body;
+    const { suhu, kelembaban, teganganAC } = req.body;
 
     // Save data to Firebase Realtime Database
-    await admin.database().ref("sensorData").push({ suhu, kelembaban });
+    await admin.database().ref("sensorData").push({ suhu, kelembaban, teganganAC });
 
     res.status(200).json({ message: "Data saved to Firebase Realtime Database" });
   } catch (error) {
     console.error("Error saving data to Firebase Realtime Database:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.send({
+      "error": "Internal server error",
+      "status": 500
+    })
+    // res.status(500).json({ error: "Internal server error" });
   }
   // const data = req.body
   // console.log('received sensor data', data)
