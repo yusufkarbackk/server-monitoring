@@ -10,9 +10,16 @@ function encrypt(data) {
   return CryptoJS.AES.encrypt(data, secretKey).toString()
 }
 
+
+function decrypt(data) {
+  const bytes = CryptoJS.AES.decrypt(data, secretKey);
+  const decryptedData = bytes.toString(CryptoJS.enc.Utf8);
+  return parseFloat(decryptedData); // Convert string back to double
+}
+
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.send('server monitoring');
 });
 
 // Endpoint untuk mendapatkan data (belombisa)
@@ -30,10 +37,11 @@ router.get('/get-data', (req, res) => {
 router.post('/post-data', async (req, res) => {
   try {
     const { suhu, kelembaban, teganganAC } = req.body;
-   
+
     const hashedSuhu = encrypt(String(suhu))
     const hashedKelembaban = encrypt(String(kelembaban))
     const hashedTeganganAC = encrypt(String(teganganAC))
+    // await admin.database().ref('sensorData').push({ suhu: suhu, kelembaban: kelembaban, teganganAC: teganganAC });
 
 
     // Save data to Firebase Realtime Database
@@ -45,6 +53,25 @@ router.post('/post-data', async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+router.post('/decrypt-data', async (req, res) => {
+  try {
+    const {encryptedSuhu, encryptedKelembaban, encryptedTeganganAC} = req.body
+    
+    const decryptedSuhu = decrypt(encryptedSuhu)
+    const decryptedKelembaban = decrypt(encryptedKelembaban)
+    const decryptedTeganganAC = decrypt(encryptedTeganganAC)
+
+    res.status(200).json({
+        decryptedSuhu,
+        decryptedKelembaban,
+        decryptedTeganganAC
+    })
+  } catch (e) {
+    console.error("Error decrypting data:", e);
+    res.status(500).json({ error: "Internal server error" });
+  }
+})
 
 //REGISTER USER
 
